@@ -63,7 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Bluetooth.Plugin.Abstractions\Bluetooth.Plugin.Abstractions.csproj">
-      <Project>{52AC09F2-E158-4138-A336-3C4441E5EF4D}</Project>
+      <Project>{3E192139-5EED-4729-BB37-E190D1283548}</Project>
       <Name>Bluetooth.Plugin.Abstractions</Name>
     </ProjectReference>
     <ProjectReference Include="..\Bluetooth.Plugin\Bluetooth.Plugin.csproj">
