@@ -26,8 +26,6 @@ namespace Bluetooth.HelloWorld.Droid
 		
 		public static void UpdateIdValues()
 		{
-			global::Plugin.Bluetooth.Resource.String.ApplicationName = global::Bluetooth.HelloWorld.Droid.Resource.String.ApplicationName;
-			global::Plugin.Bluetooth.Resource.String.Hello = global::Bluetooth.HelloWorld.Droid.Resource.String.Hello;
 			global::Xamarin.Forms.Platform.Android.Resource.Animation.abc_fade_in = global::Bluetooth.HelloWorld.Droid.Resource.Animation.abc_fade_in;
 			global::Xamarin.Forms.Platform.Android.Resource.Animation.abc_fade_out = global::Bluetooth.HelloWorld.Droid.Resource.Animation.abc_fade_out;
 			global::Xamarin.Forms.Platform.Android.Resource.Animation.abc_grow_fade_in_from_bottom = global::Bluetooth.HelloWorld.Droid.Resource.Animation.abc_grow_fade_in_from_bottom;
@@ -5980,12 +5978,6 @@ namespace Bluetooth.HelloWorld.Droid
 		
 		public partial class String
 		{
-			
-			// aapt resource value: 0x7f09003d
-			public const int ApplicationName = 2131296317;
-			
-			// aapt resource value: 0x7f09003c
-			public const int Hello = 2131296316;
 			
 			// aapt resource value: 0x7f090015
 			public const int abc_action_bar_home_description = 2131296277;
