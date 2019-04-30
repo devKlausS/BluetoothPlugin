@@ -9,13 +9,13 @@ using Xamarin.Forms;
 
 namespace Bluetooth.HelloWorld
 {
-	public partial class MainPage : ContentPage
-	{
-		public MainPage()
-		{
-			InitializeComponent();
+    public partial class MainPage : ContentPage
+    {
+        public MainPage()
+        {
+            InitializeComponent();
             this.Appearing += MainPage_Appearing;
-		}
+        }
 
         private void MainPage_Appearing(object sender, EventArgs e)
         {
@@ -35,9 +35,9 @@ namespace Bluetooth.HelloWorld
             {
                 var pairedDevices = await bluetooth.GetPairedDevices();
                 listView.ItemsSource = pairedDevices;
-                if(!pairedDevices.Any())
+                if (!pairedDevices.Any())
                 {
-                    DisplayAlert("Warning","There are no paired devices","Ok");
+                    DisplayAlert("Warning", "There are no paired devices", "Ok");
                 }
             }
         }
@@ -95,22 +95,21 @@ namespace Bluetooth.HelloWorld
                 {
                     DisplayAlert("Error", "Couldnt disconnect from device.", "Ok");
                 }
-
             }
         }
 
         private void CheckStatus()
         {
-            using (var bluetooth = CrossBluetooth.Current)
+            if (CrossBluetooth.IsSupported)
             {
-                if (bluetooth.IsSupportedByDevice)
+                using (var bluetooth = CrossBluetooth.Current)
                 {
                     var isON = bluetooth.IsTurnedOn;
                     StatusLabel.Text = isON ? "Bluetooth is On" : "Bluetooth is Off turn it on";
 
                     TurnOnBluetoothButton.IsVisible = !isON;
 
-                    if(!isON)
+                    if (!isON)
                     {
                         GetPairedDevicesButton.IsVisible = false;
                         listView.IsVisible = false;
@@ -121,18 +120,15 @@ namespace Bluetooth.HelloWorld
                         GetPairedDevicesButton.IsVisible = true;
                         listView.IsVisible = true;
                     }
-
                 }
-                else
-                {
-                    StatusLabel.Text = "Device doesnt seem to support bluetooth";
-                    TurnOnBluetoothButton.IsVisible = false;
-                    GetPairedDevicesButton.IsVisible = false;
-                    listView.IsVisible = false;
-                }
-
+            }
+            else
+            {
+                StatusLabel.Text = "Device doesnt seem to support bluetooth";
+                TurnOnBluetoothButton.IsVisible = false;
+                GetPairedDevicesButton.IsVisible = false;
+                listView.IsVisible = false;
             }
         }
-
     }
 }

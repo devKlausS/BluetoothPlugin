@@ -14,8 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -64,11 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Bluetooth.Plugin.Abstractions\Bluetooth.Plugin.Abstractions.csproj">
-      <Project>{e1663930-0661-44d2-aeec-8ec43734e637}</Project>
+      <Project>{52AC09F2-E158-4138-A336-3C4441E5EF4D}</Project>
       <Name>Bluetooth.Plugin.Abstractions</Name>
     </ProjectReference>
     <ProjectReference Include="..\Bluetooth.Plugin\Bluetooth.Plugin.csproj">
-      <Project>{31ccbdd1-dc47-4e0c-9745-f487f6204774}</Project>
+      <Project>{DCDD5752-7F0F-4111-9FA9-0B63064DF2A9}</Project>
       <Name>Bluetooth.Plugin</Name>
     </ProjectReference>
   </ItemGroup>

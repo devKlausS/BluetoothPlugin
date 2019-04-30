@@ -24,13 +24,13 @@ namespace Plugin.Bluetooth
                 {
                     throw NotImplementedInReferenceAssembly();
                 }
-                return ret;
+                return implementation.Value;
             }
         }
 
         static IBluetooth CreateBluetooth()
         {
-#if NETSTANDARD1_0
+#if NETSTANDARD2_0
             return null;
 #else
 #pragma warning disable IDE0022 // Use expression body for methods

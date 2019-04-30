@@ -23,48 +23,46 @@ namespace Bluetooth.Plugin.Android
     {
         volatile bool running = true;
         public BluetoothSocket Socket;
-        private BluetoothDevice Device;
-        private BluetoothAdapter mBluetoothAdapter;
-        private int Port = 1;
+        private BluetoothDevice m_device;
+        private BluetoothAdapter m_bluetoothAdapter;
+        private int m_port = 1;
 
         public BluetoothConnectionThread(BluetoothDevice device)
         {
             // Use a temporary object that is later assigned to mmSocket,
             // because mmSocket is final
             BluetoothSocket tmp = null;
-            Device = device;
-            mBluetoothAdapter = BluetoothAdapter.DefaultAdapter;
-            if (mBluetoothAdapter == null)
+            m_device = device;
+            m_bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+            if (m_bluetoothAdapter == null)
             {
                 // Device does not support Bluetooth
                 throw new System.Exception("No bluetooth device found");
             }
-
-
         }
 
         public override void Run()
         {
             if (IsInterrupted)
                 return;
+
             try
             {
                 ProbeConnection();
             }
             catch (IOException connectException)
             {
-
                 // Unable to connect; close the socket and get out
                 try
                 {
                     Socket.Close();
                 }
-                catch (IOException closeException)
+                catch (IOException ex)
                 {
-                    
+                    System.Diagnostics.Debug.WriteLine($"Faield to close socket, {ex}");
                 }
+
                 throw new BluetoothDeviceNotFoundException(connectException.Message);
-                return;
             }
 
         }
@@ -72,10 +70,8 @@ namespace Bluetooth.Plugin.Android
         private void ProbeConnection()
         {
             ParcelUuid[] parcelUuids;
-            parcelUuids = Device.GetUuids();
+            parcelUuids = m_device.GetUuids();
             bool isConnected = false;
-
-
 
             if (parcelUuids == null)
             {
@@ -83,43 +79,41 @@ namespace Bluetooth.Plugin.Android
                 parcelUuids[0] = new ParcelUuid(UUID.FromString("00001101-0000-1000-8000-00805f9b34fb"));
             }
 
-            mBluetoothAdapter.CancelDiscovery();
+            m_bluetoothAdapter.CancelDiscovery();
 
-            foreach (var parcelUuid in parcelUuids)
+
+            //METHOD A
+
+            try
             {
-                
-                //METHOD A
+                var method = m_device.GetType().GetMethod("createRfcommSocket");
+                Socket = (BluetoothSocket)method.Invoke(m_device, new object[] { m_port });
+                Socket.Connect();
+                isConnected = true;
+                DoDeviceConnected();
 
-                try
-                {
-                    var method = Device.GetType().GetMethod("createRfcommSocket");
-                    Socket = (BluetoothSocket)method.Invoke(Device, new object[] { Port });
-                    Socket.Connect();
-                    isConnected = true;
-                    DoDeviceConnected();
-                    break;
-                }
-                catch (Exception)
-                {
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Faield to createRfcommSocket {ex}");
+            }
 
-                }
-
+            if (!isConnected)
+            {
                 //METHOD B
 
                 try
                 {
-                    var method = Device.GetType().GetMethod("createInsecureRfcommSocket");
-                    Socket = (BluetoothSocket)method.Invoke(Device, new object[] { Port });
+                    var method = m_device.GetType().GetMethod("createInsecureRfcommSocket");
+                    Socket = (BluetoothSocket)method.Invoke(m_device, new object[] { m_port });
                     Socket.Connect();
                     isConnected = true;
                     DoDeviceConnected();
-                    break;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
+                    System.Diagnostics.Debug.WriteLine($"Faield to createInsecureRfcommSocket {ex}");
                 }
-
             }
 
             if (!isConnected)
@@ -128,61 +122,55 @@ namespace Bluetooth.Plugin.Android
 
                 try
                 {
-                    IntPtr createRfcommSocket = JNIEnv.GetMethodID(Device.Class.Handle, "createRfcommSocket", "(I)Landroid/bluetooth/BluetoothSocket;");
-                    IntPtr _socket = JNIEnv.CallObjectMethod(Device.Handle, createRfcommSocket, new global::Android.Runtime.JValue(Port));
+                    IntPtr createRfcommSocket = JNIEnv.GetMethodID(m_device.Class.Handle, "createRfcommSocket", "(I)Landroid/bluetooth/BluetoothSocket;");
+                    IntPtr _socket = JNIEnv.CallObjectMethod(m_device.Handle, createRfcommSocket, new global::Android.Runtime.JValue(m_port));
                     Socket = Java.Lang.Object.GetObject<BluetoothSocket>(_socket, JniHandleOwnership.TransferLocalRef);
                     Socket.Connect();
+                    isConnected = true;
                     DoDeviceConnected();
                 }
-                catch (IOException connectException)
+                catch (IOException ex)
                 {
+                    System.Diagnostics.Debug.WriteLine($"Faield to createRfcommSocket JNI, {ex}");
+                }
+            }
 
-                    // Unable to connect; close the socket and get out
+            if (!isConnected)
+            {
+                // Unable to connect; close the socket and get out
+                if (Socket != null)
+                {
                     try
                     {
                         Socket.Close();
                     }
-                    catch (IOException closeException)
+                    catch (IOException e)
                     {
-
+                        System.Diagnostics.Debug.WriteLine($"Faield to close socket, {e}");
                     }
-                    DoDeviceConnectionFailed();
                 }
+                DoDeviceConnectionFailed();
             }
-
-            if(Socket != null && Socket.IsConnected)
-            {
-
-            }
-
         }
 
         public event EventHandler DeviceConnected;
         private void DoDeviceConnected()
         {
-
-            if (DeviceConnected != null)
-            {
-                DeviceConnected(this, new EventArgs());
-            }
+            System.Diagnostics.Debug.WriteLine("device connected");
+            DeviceConnected?.Invoke(this, new EventArgs());
         }
 
         public event EventHandler DeviceConnectionFailed;
         private void DoDeviceConnectionFailed()
         {
-            if (DeviceConnectionFailed != null)
-            {
-                DeviceConnectionFailed(this, new EventArgs());
-            }
+            System.Diagnostics.Debug.WriteLine("device connection failed");
+            DeviceConnectionFailed?.Invoke(this, new EventArgs());
         }
 
         public event EventHandler<BluetoothDataReceivedEventArgs> ReceivedData;
         private void DoReceivedData(byte[] data)
         {
-            if (DeviceConnectionFailed != null)
-            {
-                ReceivedData(this, new BluetoothDataReceivedEventArgs(data));
-            }
+            ReceivedData?.Invoke(this, new BluetoothDataReceivedEventArgs(data));
         }
 
         /** Will cancel an in-progress connection, and close the socket */
@@ -191,11 +179,15 @@ namespace Bluetooth.Plugin.Android
             try
             {
                 Socket.Close();
+            }
+            catch (IOException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Disconnect() faild to close socket {ex}");
+            }
+            finally
+            {
                 Socket = null;
                 this.Interrupt();
-            }
-            catch (IOException e) {
-
             }
         }
 
@@ -215,12 +207,9 @@ namespace Bluetooth.Plugin.Android
                 length = (int)socketInputStream.Length;
                 result = new byte[length];
                 await socketInputStream.ReadAsync(result, 0, length);
-                if(length>0)
-                DoReceivedData(result);
+                if (length > 0)
+                    DoReceivedData(result);
             }
-
         }
-
-
     }
 }

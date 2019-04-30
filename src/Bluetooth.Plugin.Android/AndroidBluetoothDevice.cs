@@ -56,7 +56,7 @@ namespace Bluetooth.Plugin.Android
             CurrentUniqueIdentifier = uniqueIdentifier;
         }
 
-        public Task Connect()
+        public async Task Connect()
         {
             var tc = new TaskCompletionSource<bool>();
 
@@ -77,7 +77,8 @@ namespace Bluetooth.Plugin.Android
 
             _bluetoothConnectionThread.Run();
 
-            return tc.Task;
+            if (!await tc.Task)
+                throw new Exception("failed to connect");
         }
 
         private void _bluetoothConnectionThread_ReceivedData(object sender, BluetoothDataReceivedEventArgs e)
@@ -113,7 +114,8 @@ namespace Bluetooth.Plugin.Android
 
         public Task Write(byte[] bytes)
         {
-            return Task.Factory.StartNew(()=> {
+            return Task.Factory.StartNew(() =>
+            {
                 _isWriting = true;
                 var msgBuffer = bytes;
                 try
@@ -128,11 +130,7 @@ namespace Bluetooth.Plugin.Android
                 {
                     _isWriting = false;
                 }
-                
             });
-
-            
-
         }
 
 
@@ -172,9 +170,9 @@ namespace Bluetooth.Plugin.Android
 
         private void DoOnDataReceived(byte[] data)
         {
-            if(OnDataReceived!= null)
+            if (OnDataReceived != null)
             {
-                OnDataReceived(this,new BluetoothDataReceivedEventArgs(data));
+                OnDataReceived(this, new BluetoothDataReceivedEventArgs(data));
             }
         }
     }

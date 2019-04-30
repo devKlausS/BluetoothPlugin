@@ -13,9 +13,9 @@ namespace Plugin.Bluetooth.Abstractions
 
         string Address { get; set; }
 
-        bool IsConnected { get;}
+        bool IsConnected { get; }
 
-        bool IsWriting { get;}
+        bool IsWriting { get; }
 
         Task Connect();
 
